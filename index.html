@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <h1>Whatsapp 2</h1>
+    
+    <p>Username</p>
+    <input type="text" name="username" id="txtUsername">
+
+    <p>Message</p>
+    <textarea name="textMsg" id="txtMsg" rows="10" cols="50"></textarea>
+    <br>
+    <button type="button" id="btnSend">Send</button>
+
+    <script>
+        const socket = new WebSocket('ws://localhost:8000');
+        socket.binaryType = "blob";
+        btnSend = document.getElementById('btnSend');
+
+        btnSend.addEventListener('click', () => {
+            const username = document.getElementById('txtUsername').value || 'Anonymous';
+            const msg = document.getElementById('txtMsg').value;
+            //console.log(`${username}: ${msg}`);
+
+            socket.send(`${username}: ${msg}`);
+        });
+
+        socket.onopen = () => {
+            console.log('Connected to Whatsapp2 server');
+        };
+
+        socket.onmessage = async (event) => {
+            if (event.data instanceof Blob) {
+                const arrayBuffer = await event.data.arrayBuffer();
+                const message = new TextDecoder("utf-8").decode(arrayBuffer);
+                console.log(message);
+            } else {
+                console.log(event.data);
+            }
+        };
+
+        socket.onclose = () => {
+            console.log('Disconnected from WebSocket server');
+        };
+    </script>
+</body>
+</html>
